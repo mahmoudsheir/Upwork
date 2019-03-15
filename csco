@@ -1,0 +1,37 @@
+enable 15
+configure terminal
+{% for task in Tasks %}
+	{% if task.name  == "createvlan" %}
+vlan {{ task.vlan }}
+	{% elif task.name == "deletevlan" %}
+no vlan {{ task.vlan }}
+	{% elif task.name == "enableport" %}
+interface {{ task.port }}
+no shutdown
+	{% elif task.name == "disableport" %}
+interface {{ task.port }}
+shutdown
+	{% elif task.name == "trunkinterface" %}
+inteface {{ task.interface }}
+switchport mode trunk
+	{% elif task.name == "accessinterface" %}
+inteface {{ task.interface }}
+switchport mode access
+	{% elif task.name == "addip" %}
+inteface {{ task.interface }}
+ip address {{ task.ip }} {{ task.mask }}
+	{% elif task.name == "deleteip" %}
+inteface {{ task.interface }}
+no ip address {{ task.ip }}
+	{% elif task.name == "changeip" %}
+inteface {{ task.interface }}
+no ip address {{ task.removedip }}
+ip address {{ task.addedip }} {{ task.mask }}
+	{% elif task.name == "ospf" %}
+router ospf {{ task.instance }}
+router-id {{ task.routerid }}
+exit
+interface {{ task.interface }}
+ip ospf {{ task.instance }} area {{ task.area }}
+	{% endif %}
+{% endfor %}

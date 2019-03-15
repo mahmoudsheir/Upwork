@@ -1,0 +1,25 @@
+{% for task in Tasks %}
+	{% if task.name == "createvlan" %}
+set vlan {{ task.VlanName }} vlan-id {{ task.vlan }}
+	{% elif task.name == "deletevlan" %}
+delete vlan {{ task.VlanName }} vlan-id {{ task.vlan }}
+	{% elif task.name == "enableport" %}
+set interfaces {{ task.port }} enable
+	{% elif task.name == "disableport" %}
+set interfaces {{ task.port }} disable
+	{% elif task.name == "trunkinterface" %}
+set interfaces {{ task.interface }} family ethernet-switching port-mode trunk
+	{% elif task.name == "accessinterface" %}
+set interfaces {{ task.interface }} family ethernet-switching port-mode access
+	{% elif task.name == "addip" %}
+set interfaces {{ task.interface }} unit 0 family inet address {{ task.ip }}/{{ task.masklength }}
+	{% elif task.name == "deleteip" %}
+delete interfaces {{ task.interface }} unit 0 family inet address {{ task.ip }}
+	{% elif task.name == "changeip" %}
+delete interfaces {{ task.interface }} unit 0 family inet address {{ task.removedip }}
+set interfaces {{ task.interface }} unit 0 family inet address {{ task.addedip }}/{{ task.masklength }}
+	{% elif task.name == "ospf" %}
+set routing-options router-id {{ task.routerid }}
+set protocols ospf area {{ task.area }} interface {{ task.interface }}
+	{% endif %}
+{% endfor %}
