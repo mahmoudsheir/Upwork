@@ -1,0 +1,38 @@
+{% for task in Tasks %}
+	{% if task.name == "l2agg" %}
+		{% if task.mode == access %}
+set interfaces ae{{ task.aggnumber }} unit 0 family ethernet-switching interface-mode access
+		{% elif task.mode == trunk %}
+set interfaces ae{{ task.aggnumber }} unit 0 family ethernet-switching interface-mode trunk
+		{% endif %}{% for vlan in task.vlans %}
+set vlans {{ vlan.vlname }} vlan-id {{ vlan.vlnumber }}
+set interfaces ae{{ task.aggnumber }} unit 0 family ethernet-switching vlan members {{ vlan.vlname }}
+		{% endfor %}{% for interface in task.interfaces %}
+set interfaces {{ interface }} ether-options 802.3ad ae{{ task.aggnumber }}
+		{% endfor %}
+	{% elif task.name == "l3agg" %}
+		{% for interface in task.interfaces %}
+set interfaces {{ interface }} gigether-options 802.3ad ae{{ task.aggnumber }}
+		{% endfor %}{% for vlan in task.vlans %}{% if vlan != 0 %}
+set interfaces ae{{ task.aggnumber }} unit {{ vlan.vlnumber }} vlan-id {{ vlan.vlnumber }}{% endif %}
+set interfaces ae{{ task.aggnumber }} unit {{ vlan.vlnumber }} family inet address {{ vlan.l3ip }}.{{ vlan.subnet }}
+		{% endfor %}
+	{% elif task.name == "l3irb" %}
+		{% for vlan in task.vlans %}
+set interfaces irb unit {{ vlan.vlnumber }} family inet address {{ vlan.l3ip }}.{{ vlan.subnet }}
+set vlans {{ vlan.vlname }} l3-interface irb.{{ vlan.vlnumber }}
+		{% endfor %}
+	{% elif task.name == "aggaddintf" %}
+		{% for interface in task.interfaces %}
+set interfaces {{ interface }} ether-options 802.3ad ae{{ task.aggnumber }}
+		{% endfor %}
+	{% elif task.name == "aggdelintf" %}
+		{% for interface in task.interfaces %}
+delete interfaces {{ interface }} ether-options 
+		{% endfor %}
+	{% elif task.name == "aggdelintf" %}
+		{% for vlan in task.vlans %}
+set vlans {{ vlan.vlname }} vlan-id {{ vlan.vlnumber }}
+		{% endfor %}
+	{% endif %}
+{% endfor %}
