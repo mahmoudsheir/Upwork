@@ -1,0 +1,35 @@
+{% for task in Tasks %}
+	{% if task.name == "l2agg" %}
+set interfaces ae{{ task.aggnumber }} flexible-vlan-tagging
+set interfaces ae{{ task.aggnumber }} encapsulation flexible-ethernet-services
+		{% for interface in task.interfaces %}
+set interfaces {{ interface }} gigether-options 802.3ad ae{{ task.aggnumber }}
+		{% endfor %}{% for vlan in task.vlans %}
+set interfaces ae{{ task.aggnumber }} unit {{ vlan.vlnumber }} encapsulation vlan-bridge
+set interfaces ae{{ task.aggnumber }} unit {{ vlan.vlnumber }} vlan-id {{ vlan.vlnumber }}
+set interfaces ae{{ task.aggnumber }} unit {{ vlan.vlnumber }} family bridge
+set bridge-domains {{ vlan.vlname }} vlan-id {{ vlan.vlnumber }}
+set bridge-domains {{ vlan.vlname }} interface ae{{ task.aggnumber }}.{{ vlan.vlnumber }}
+		{% endfor %}
+	{% elif task.name == "l3agg" %}
+		{% for interface in task.interfaces %}
+set interfaces {{ interface }} gigether-options 802.3ad ae{{ task.aggnumber }}
+		{% endfor %}{% for vlan in task.vlans %}
+set interfaces ae{{ task.aggnumber }} unit {{ vlan.vlnumber }} vlan-id {{ vlan.vlnumber }}
+set interfaces ae{{ task.aggnumber }} unit {{ vlan.vlnumber }} family inet address {{ vlan.l3ip }}.{{ vlan.subnet }}
+		{% endfor %}
+	{% elif task.name == "l3irb" %}
+		{% for vlan in task.vlans %}
+set interfaces irb unit {{ vlan.vlnumber }} family inet address {{ vlan.l3ip }}.{{ vlan.subnet }}
+set bridge-domains {{ vlan.vlname }} routing-interface irb.{{ vlan.vlnumber }}
+		{% endfor %}
+	{% elif task.name == "aggaddintf" %}
+		{% for interface in task.interfaces %}
+set interfaces {{ interface }} gigether-options 802.3ad ae{{ task.aggnumber }}
+		{% endfor %}
+	{% elif task.name == "aggdelintf" %}
+		{% for interface in task.interfaces %}
+delete interfaces {{ interface }} gigether-options 
+		{% endfor %}
+	{% endif %}
+{% endfor %}
