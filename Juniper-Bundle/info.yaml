@@ -54,14 +54,6 @@
           subnet : 24
 - 10.10.10.2:
   - Tasks:
-    - name : createvlans
-      vlans :
-        - vlname : testvlan1
-          vlnumber : 10
-        - vlname : testvlan2
-          vlnumber: 20 
-        - vlname : testvlan3
-          vlnumber : 30 
     - name : l2agg
       aggnumber : 0
       interfaces :
@@ -72,9 +64,9 @@
         - vlname : testvlan1
           vlnumber : 10
         - vlname : testvlan2
-          vlnumber : 
+          vlnumber : 20
     - name : l2agg
-      aggnumber : 0
+      aggnumber : 1
       interfaces :
        - ge-0/0/3
        - ge-0/0/4
@@ -97,7 +89,7 @@
           l3ip : 10.10.30.2
           subnet : 24
     - name : l3agg
-      aggnumber : 1
+      aggnumber : 2
       interfaces : 
         - ge-0/0/5
         - ge-0/0/6
@@ -106,3 +98,12 @@
           vlnumber : 40
           l3ip : 10.10.40.2
           subnet : 24
+    - name : aggaddintf
+      aggnumber : 0
+      interfaces:
+        - ge-0/0/7
+        - ge-0/0/8
+    - name : aggdelintf
+      aggnumber : 0
+      interfaces :
+        - ge-0/0/8
