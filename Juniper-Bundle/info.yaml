@@ -1,0 +1,108 @@
+10.10.10.4:
+  - Tasks:
+    - name : createvlans
+      vlans :
+        - vlname : testvlan1
+          vlnumber : 10
+        - vlname : testvlan2
+          vlnumber: 20 
+        - vlname : testvlan3
+          vlnumber : 30 
+    - name : l2agg
+      aggnumber : 0
+      interfaces :
+       - xe-0/0/1
+       - xe-0/0/2
+      mode : trunk
+      vlans : 
+        - vlname : testvlan1
+          vlnumber : 10
+        - vlname : testvlan2
+          vlnumber : 
+    - name : l2agg
+      aggnumber : 0
+      interfaces :
+       - xe-0/0/3
+       - xe-0/0/4
+      mode : access
+      vlans : 
+        - vlname : testvlan3
+          vlnumber : 30
+    - name : l3irb
+      vlans :
+        - vlname : testvlan1
+          vlnumber : 10
+          l3ip : 10.10.10.4
+          subnet : 24
+        - vlname : testvlan2
+          vlnumber : 20
+          l3ip : 10.10.20.4
+          subnet : 24
+        - vlname : testvlan3
+          vlnumber : 30
+          l3ip : 10.10.30.4
+          subnet : 24
+    - name : l3agg
+      aggnumber : 1
+      interfaces : 
+        - xe-0/0/5
+        - xe-0/0/6
+      vlans :
+        - vlname : testvlan3
+          vlnumber : 40
+          l3ip : 10.10.40.4
+          subnet : 24
+10.10.10.2:
+  - Tasks:
+    - name : createvlans
+      vlans :
+        - vlname : testvlan1
+          vlnumber : 10
+        - vlname : testvlan2
+          vlnumber: 20 
+        - vlname : testvlan3
+          vlnumber : 30 
+    - name : l2agg
+      aggnumber : 0
+      interfaces :
+       - ge-0/0/1
+       - ge-0/0/2
+      mode : trunk
+      vlans : 
+        - vlname : testvlan1
+          vlnumber : 10
+        - vlname : testvlan2
+          vlnumber : 
+    - name : l2agg
+      aggnumber : 0
+      interfaces :
+       - ge-0/0/3
+       - ge-0/0/4
+      mode : access
+      vlans : 
+        - vlname : testvlan3
+          vlnumber : 30
+    - name : l3irb
+      vlans :
+        - vlname : testvlan1
+          vlnumber : 10
+          l3ip : 10.10.10.2
+          subnet : 24
+        - vlname : testvlan2
+          vlnumber : 20
+          l3ip : 10.10.20.2
+          subnet : 24
+        - vlname : testvlan3
+          vlnumber : 30
+          l3ip : 10.10.30.2
+          subnet : 24
+    - name : l3agg
+      aggnumber : 1
+      interfaces : 
+        - ge-0/0/5
+        - ge-0/0/6
+      vlans :
+        - vlname : testvlan3
+          vlnumber : 40
+          l3ip : 10.10.40.2
+          subnet : 24
