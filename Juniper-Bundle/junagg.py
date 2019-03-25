@@ -39,7 +39,7 @@ def main():
 			dev.close()
 		elif QFX in dev.facts["RE0"]["model"]:
 			TEMPLATE_ENVIRONMENT = Environment(autoescape=False,loader=FileSystemLoader(THIS_DIR),trim_blocks=False)
-			conf = TEMPLATE_ENVIRONMENT.get_template("MX").render(yamload[key])
+			conf = TEMPLATE_ENVIRONMENT.get_template("QFX").render(yamload[key])
 			with Config(dev, mode='private') as cu:
 				cu.load(conf, format='set')
 				cu.pdiff()
