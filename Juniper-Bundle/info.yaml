@@ -18,7 +18,7 @@
         - vlname : testvlan1
           vlnumber : 10
         - vlname : testvlan2
-          vlnumber : 
+          vlnumber : 20
     - name : l2agg
       aggnumber : 0
       interfaces :
