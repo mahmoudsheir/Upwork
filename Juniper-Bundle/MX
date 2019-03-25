@@ -14,8 +14,8 @@ set bridge-domains {{ vlan.vlname }} interface ae{{ task.aggnumber }}.{{ vlan.vl
 	{% elif task.name == "l3agg" %}
 		{% for interface in task.interfaces %}
 set interfaces {{ interface }} gigether-options 802.3ad ae{{ task.aggnumber }}
-		{% endfor %}{% for vlan in task.vlans %}
-set interfaces ae{{ task.aggnumber }} unit {{ vlan.vlnumber }} vlan-id {{ vlan.vlnumber }}
+		{% endfor %}{% for vlan in task.vlans %}{% if vlan != 0 %}
+set interfaces ae{{ task.aggnumber }} unit {{ vlan.vlnumber }} vlan-id {{ vlan.vlnumber }}{% endif %}
 set interfaces ae{{ task.aggnumber }} unit {{ vlan.vlnumber }} family inet address {{ vlan.l3ip }}.{{ vlan.subnet }}
 		{% endfor %}
 	{% elif task.name == "l3irb" %}
