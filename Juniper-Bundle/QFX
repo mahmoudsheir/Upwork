@@ -30,7 +30,7 @@ set interfaces {{ interface }} ether-options 802.3ad ae{{ task.aggnumber }}
 		{% for interface in task.interfaces %}
 delete interfaces {{ interface }} ether-options 
 		{% endfor %}
-	{% elif task.name == "aggdelintf" %}
+	{% elif task.name == "createvlans" %}
 		{% for vlan in task.vlans %}
 set vlans {{ vlan.vlname }} vlan-id {{ vlan.vlnumber }}
 		{% endfor %}
