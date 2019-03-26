@@ -1,4 +1,5 @@
 from jnpr.junos import Device
+from lxml import etree
 import yaml
 import os
 import argaprse
@@ -18,6 +19,48 @@ def parseoptions():
 	parser.add_argument("Username", help ="Routers Username")
 	args = vars(parser.parse_args())
 	return args.values()
+
+def verifyinput():
+	for key in yamload:
+		dev = Device(key,user =username,passwd = password,port=22)
+		dev.open()
+		for task in yamload[key]:
+			data = dev.rpc.get_config(filter_xml='chassis/aggregated-devices')
+			if task["name"] == "l2agg" or task["name"] == "l3agg":
+				if data.findtext(".//device-count") == None:
+					print("chassis aggregated-devices ethernet device-count should be configured to add aggrgates")
+					exit()
+				elif task["aggnumber"] >= int(data.findtext(".//device-count")):
+					print("Aggregated-devices ethernet device-count configured  is %s less than aggnumber in task %s at device %s" %(str(data.findtext(".//device-count")), task["name"] , yamload[key] ))
+					exit()
+				for interface in task["interfaces"]:
+					xml="<configuration><interfaces><interface><name>"+interface+"</name></interface></interfaces></configuration>"
+					if data.findtext(".//interface") != None:
+						print("interface %s in task %s at device %s has current configuration" %(interface,task["name"] , yamload[key]))
+						exit()
+			elif task["name"] == "l2agg" or task["name"] == "l3irb":
+				data = dev.rpc.get_vlan_information()
+				if QFX in dev.facts["RE0"]["model"]:
+					for vlan in task["vlans"]:
+						found = False
+						for vl in data.findall(".//l2ng-l2ald-vlan-instance-group"):
+							if str(vl.find(".//l2ng-l2rtb-vlan-name").text) == vlan["vlname"] and int(vl.find(".//l2ng-l2rtb-vlan-tag").text) == vlan["vlnumber"]:
+								found = True
+								break
+						if found == False:
+							for tas in yamload[key]:
+								create = False
+								if tas["name"] =="createvlan":
+									for  v in tas["vlans"]:
+										if v["vlname"] == vlan["vlname"] and v["vlnumber"] == vlan["vlnumber"]:
+											create = True
+											break
+							if create == False:
+								print("Vlan %s in task %s for device %s has to be created"%(vlan,task["name"],yamload[key]))
+								exit()
+
+
+
 
 def main():
 	ymlfilename , username = parseoptions()
