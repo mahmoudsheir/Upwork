@@ -20,13 +20,13 @@ def parseoptions():
 	args = vars(parser.parse_args())
 	return args.values()
 
-def verifyinput():
+def verifyandconfigure(yamload,THIS_DIR,username,password):
 	for key in yamload:
 		dev = Device(key,user =username,passwd = password,port=22)
 		dev.open()
 		for task in yamload[key]:
-			data = dev.rpc.get_config(filter_xml='chassis/aggregated-devices')
 			if task["name"] == "l2agg" or task["name"] == "l3agg":
+				data = dev.rpc.get_config(filter_xml='chassis/aggregated-devices')
 				if data.findtext(".//device-count") == None:
 					print("chassis aggregated-devices ethernet device-count should be configured to add aggrgates")
 					exit()
@@ -35,7 +35,8 @@ def verifyinput():
 					exit()
 				for interface in task["interfaces"]:
 					xml="<configuration><interfaces><interface><name>"+interface+"</name></interface></interfaces></configuration>"
-					if data.findtext(".//interface") != None:
+					data2 = dev.rpc.get_config(filter_xml=etree.XML(xml))
+					if data2.findtext(".//interface") != None:
 						print("interface %s in task %s at device %s has current configuration" %(interface,task["name"] , yamload[key]))
 						exit()
 			elif task["name"] == "l2agg" or task["name"] == "l3irb":
@@ -58,19 +59,25 @@ def verifyinput():
 							if create == False:
 								print("Vlan %s in task %s for device %s has to be created"%(vlan,task["name"],yamload[key]))
 								exit()
-
-
-
-
-def main():
-	ymlfilename , username = parseoptions()
-	password = getpass.getpass()
-	THIS_DIR = str(os.path.dirname(os.path.abspath(__file__)))
-	fob =open(ymlfilename).read()
-	yamload = yaml.load(fob)
-	for key in yamload:
-		dev = Device(key,user =username,passwd = password,port=22)
-		dev.open()
+			elif task["name"] == "aggaddintf":
+				for interface in task["interfaces"]:
+					xml="<configuration><interfaces><interface><name>"+interface+"</name></interface></interfaces></configuration>"
+					data2 = dev.rpc.get_config(filter_xml=etree.XML(xml))
+					if data2.findtext(".//interface") != None:
+						print("interface %s in task %s at device %s has current configuration" %(interface,task["name"] , yamload[key]))
+						exit()
+				agg = "ae"+task["aggnumber"]
+				xml="<configuration><interfaces><interface><name>"+agg+"</name></interface></interfaces></configuration>"
+				data2 = dev.rpc.get_config(filter_xml=etree.XML(xml))
+				if data2.findtext(".//interface") == None:
+						print("Note : Aggregate interface %s in task %s at device %s is not configured" %(agg,task["name"] , yamload[key]))
+			elif task["name"] == "aggdelintf":
+				for interface in task["interfaces"]:
+					xml="<configuration><interfaces><interface><name>"+interface+"</name></interface></interfaces></configuration>"
+					data2 = dev.rpc.get_config(filter_xml=etree.XML(xml))
+					if data2.findtext(".//bundle") != str("ae"+task["aggnum"]):
+						print("Error: Interface %s is not configured under aggregate %s at task %s at device %s"%(interface,task["aggnum"],task["name"],yamload[key]))
+						exit()
 		if MX in dev.facts["RE0"]["model"]:
 			TEMPLATE_ENVIRONMENT = Environment(autoescape=False,loader=FileSystemLoader(THIS_DIR),trim_blocks=False)
 			conf = TEMPLATE_ENVIRONMENT.get_template("MX").render(yamload[key])
@@ -90,7 +97,19 @@ def main():
 			print("CONF loaded successfully in {}",key)
 			dev.close()
 		else:
-			print("Unsupported Platform")			
+			print("Unsupported Platform")	
+
+
+
+
+
+def main():
+	ymlfilename , username = parseoptions()
+	password = getpass.getpass()
+	THIS_DIR = str(os.path.dirname(os.path.abspath(__file__)))
+	fob =open(ymlfilename).read()
+	yamload = yaml.load(fob)
+	verifyandconfigure(yamload,THIS_DIR,username,password)			
 
 if __name__ == "__main__":
 	main()
