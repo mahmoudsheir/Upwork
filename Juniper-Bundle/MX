@@ -16,11 +16,13 @@ set bridge-domains {{ vlan.vlname }} interface ae{{ task.aggnumber }}.{{ vlan.vl
 set interfaces {{ interface }} gigether-options 802.3ad ae{{ task.aggnumber }}
 		{% endfor %}{% for vlan in task.vlans %}{% if vlan != 0 %}
 set interfaces ae{{ task.aggnumber }} unit {{ vlan.vlnumber }} vlan-id {{ vlan.vlnumber }}{% endif %}
-set interfaces ae{{ task.aggnumber }} unit {{ vlan.vlnumber }} family inet address {{ vlan.l3ip }}.{{ vlan.subnet }}
+set interfaces ae{{ task.aggnumber }} unit {{ vlan.vlnumber }} family inet address {{ vlan.l3ip }}/{{ vlan.subnet }}
+set interfaces ae{{ task.aggnumber }} flexible-vlan-tagging
+set interfaces ae{{ task.aggnumber }} encapsulation flexible-ethernet-services  
 		{% endfor %}
 	{% elif task.name == "l3irb" %}
 		{% for vlan in task.vlans %}
-set interfaces irb unit {{ vlan.vlnumber }} family inet address {{ vlan.l3ip }}.{{ vlan.subnet }}
+set interfaces irb unit {{ vlan.vlnumber }} family inet address {{ vlan.l3ip }}/{{ vlan.subnet }}
 set bridge-domains {{ vlan.vlname }} routing-interface irb.{{ vlan.vlnumber }}
 		{% endfor %}
 	{% elif task.name == "aggaddintf" %}
